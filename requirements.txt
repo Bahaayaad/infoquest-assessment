@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+psycopg2-binary
+chromadb
+langchain-huggingface
+langchain-openai
+langchain-core
+openai
+python-dotenv
+tenacity
+sentence-transformers
