@@ -7,6 +7,9 @@ Search 10,000 candidate profiles using natural language, powered by vector searc
 ## Setup
 
 ```bash
+
+Copy `.env.example` to `.env` and fill in your credentials
+
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
