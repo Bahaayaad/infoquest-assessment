@@ -214,8 +214,8 @@ def react_agent_step(
     You think step by step, then take one action per turn.
 
     Original query: "{original_query}"
-    Current iteration: {iteration} of {max_iterations} maximum
-    Total candidates collected so far: {total_collected}
+    Current iteration: {iteration} of {max_iteration} maximum
+    Total candidates collected so far: {total}
 
     {f"History so far:{chr(10)}{history_text}{chr(10)}" if history_text else "No history yet — this is your first step."}
 
