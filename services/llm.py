@@ -147,7 +147,7 @@ def rerank_candidates(query: str, candidates: list[dict], top_k: int) -> list[di
         for i, c in enumerate(candidates)
     )
 
-    print(f"let's observe here ----> {summaries}\n")
+
 
     response = client.chat.completions.create(
         model=settings.llm_model,

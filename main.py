@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 
 from routes import ingest, chat, health
 
-print("test")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
