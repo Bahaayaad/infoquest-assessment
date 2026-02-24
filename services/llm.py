@@ -1,5 +1,7 @@
 import json
 import logging
+from typing import List
+
 from openai import OpenAI
 from config import settings
 
@@ -172,3 +174,138 @@ Best {top_k} (as JSON array of numbers):"""}],
     except Exception as e:
         logger.warning("Reranking failed, returning original order: %s", e)
         return candidates[:top_k]
+
+
+def decompose_query(query: str) -> str:
+
+    response = client.chat.completions.create(
+        model=settings.llm_model,
+        messages=[{"role": "user", "content": f""" convert this query into a narrow and specfic  search
+string that matches all criteria that must in
+
+Example: 
+Input: Find regulatory affair manager expert with SFDA experience in  pharma and must be based in Saudi Arabia Riaydh
+Output: regulatory affair manager SFDA pharmaceutical Saudi Arabia
+
+Query:{query}
+"""}],
+        temperature=0.3,
+    )
+    return response.choices[0].message.content.strip()
+
+#TODO: Modify the Prompt
+def react_agent_step(
+        original_query: str,
+        history: List[dict],
+        total: int,
+        iteration: int,
+        max_iteration: int
+) -> dict:
+
+   response = client.chat.completions.create(
+       model=settings.llm_model,
+       messages=[{"role": "user", "content": f"""
+       You are a ReAct-style iterative search agent.
+    
+    Your task is to decide the NEXT step in the funnel search process.
+    
+    You MUST return STRICT JSON.
+    Do NOT return markdown.
+    Do NOT return explanations outside JSON.
+    Do NOT include extra keys.
+    Do NOT include trailing text.
+    
+    RESPONSE FORMAT (STRICT):
+    {
+      "thought": "string",
+      "action": "SEARCH" | "STOP",
+      "reasoning": "string"
+    }
+    
+    No other fields are allowed.
+    
+    --------------------------------------------------
+    OBJECTIVE
+    --------------------------------------------------
+    Find high-quality candidates for the user query.
+    Start narrow. Broaden gradually.
+    Relax only ONE new constraint per iteration.
+    Stop as soon as sufficient high-quality results exist or further broadening would damage relevance.
+    
+    --------------------------------------------------
+    INPUTS YOU WILL RECEIVE EACH ITERATION
+    --------------------------------------------------
+    - user_query
+    - iteration_index
+    - max_iterations
+    - action_input
+    
+    --------------------------------------------------
+    FUNNEL STRATEGY (ORDERED, MONOTONIC)
+    --------------------------------------------------
+    
+    LEVEL 1 — STRICT (All constraints enforced)
+    - Enforce ALL must_have
+    - Enforce ALL should_have if possible
+    
+    LEVEL 2 — RELAX ONE HARD FILTER
+    Relax exactly ONE of the following (if not already relaxed):
+    1. Location scope expansion
+    2. Regulator/keyword specificity expansion
+    3. Industry scope expansion
+    Role/title remains strict.
+    
+    LEVEL 3 — ROLE ADJACENCY EXPANSION
+    - Expand role to closely related roles
+    - Keep industry and region bounded
+    
+    LEVEL 4 — LAST RESORT BROADENING
+    - Allow advisory/consulting/ex-regulator types
+    - Maintain relevance guardrails
+    
+    Never skip levels.
+    Never relax more than one new constraint per iteration.
+    
+    --------------------------------------------------
+    STOP CONDITIONS
+    --------------------------------------------------
+    Return action=STOP if ANY condition is met:
+    
+    1. strong_matches >= target_strong
+    2. total_found >= target_total AND relevance_rate >= min_relevance_rate
+    3. novelty_rate < min_novelty_rate
+    4. iteration_index >= max_iterations
+    5. Further broadening would clearly reduce relevance below acceptable threshold
+    
+    Otherwise return action=SEARCH.
+    
+    --------------------------------------------------
+    THOUGHT REQUIREMENTS
+    --------------------------------------------------
+    The "thought" must:
+    - Explain current result quality
+    - Identify current funnel level
+    - State which constraint would be relaxed next (if SEARCH)
+    - Or justify why stopping is optimal
+    
+    Keep it concise but logically complete.
+    
+    --------------------------------------------------
+    REASONING REQUIREMENTS
+    --------------------------------------------------
+    The "reasoning" must:
+    - Justify the chosen action
+    - Reference stop conditions OR funnel progression logic
+    - Be decision-focused (not descriptive)
+    
+    --------------------------------------------------
+    action_input REQUIREMENTS
+    --------------------------------------------------
+    the "action_input" for each search query there must be action_input query that adjust according to the step
+
+    --------------------------------------------------
+    OUTPUT STRICTLY JSON.
+    NO EXTRA TEXT.
+           """}],
+       temperature= 0
+   )
