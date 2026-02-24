@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from routes import ingest, chat, health
+from routes import ingest, chat, health, research
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,6 +16,8 @@ app = FastAPI(title="InfoQuest - Expert Network Search")
 app.include_router(ingest.router)
 app.include_router(chat.router)
 app.include_router(health.router)
+
+app.include_router(research.router)
 
 
 @app.exception_handler(RequestValidationError)

@@ -176,23 +176,6 @@ Best {top_k} (as JSON array of numbers):"""}],
         return candidates[:top_k]
 
 
-def decompose_query(query: str) -> str:
-
-    response = client.chat.completions.create(
-        model=settings.llm_model,
-        messages=[{"role": "user", "content": f""" convert this query into a narrow and specfic  search
-string that matches all criteria that must in
-
-Example: 
-Input: Find regulatory affair manager expert with SFDA experience in  pharma and must be based in Saudi Arabia Riaydh
-Output: regulatory affair manager SFDA pharmaceutical Saudi Arabia
-
-Query:{query}
-"""}],
-        temperature=0.3,
-    )
-    return response.choices[0].message.content.strip()
-
 #TODO: Modify the Prompt
 def react_agent_step(
         original_query: str,

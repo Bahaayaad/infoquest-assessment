@@ -1,15 +1,22 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from models.candidate import CandidateResult
 
 
 class ResearchRequest (BaseModel):
     query: str
-    max_iterations: int = 5
+    max_iterations: int = 4
+    min_results: int = 5
 
+    @field_validator('max_iterations')
+    @classmethod
+    def cap_max_iterations(cls, v: int) -> int:
+        if v > 5:
+            return 5
+        return v
 
 class IterationLog(BaseModel):
     iteration: int
@@ -23,6 +30,7 @@ class ResearchResponse(BaseModel):
     query: str
     candidates: list[CandidateResult]
     total_found: int
-    trace: List[IterationLog]
-    timestamp: datetime
-
+    iterations_ran: int
+    stop_reason: str
+    react_trace: list[IterationLog]
+    timestamp: datetime = datetime.utcnow()
