@@ -172,24 +172,3 @@ Best {top_k} (as JSON array of numbers):"""}],
     except Exception as e:
         logger.warning("Reranking failed, returning original order: %s", e)
         return candidates[:top_k]
-
-def extract_filters(query: str) -> dict:
-    response = client.chat.completions.create(
-        model=settings.llm_model,
-        messages=[{"role": "user", "content": f"""Extract hard filters from this search query.
-Return JSON only. Use null if not mentioned.
-{{"country": "string or null", "min_years": "integer or null", "industry": "string or null"}}
-
-
-Query: {query}"""}],
-        max_tokens=80,
-        temperature=0,
-    )
-    try:
-        raw = response.choices[0].message.content.strip()
-        if "```" in raw:
-            raw = raw.split("```")[1].lstrip("json").strip()
-        return json.loads(raw)
-    except Exception as e:
-        logger.warning("Filter extraction failed: %s", e)
-        return {}
