@@ -222,7 +222,7 @@ def react_agent_step(
     Your job:
     - If this is the first step: decompose the query into the most NARROW, specific search string (ALL criteria at once)
     - If results are insufficient: broaden ONE constraint at a time (location first, then role, then industry)
-    - STOP if: {total_collected} >= 5 good matches, OR iteration >= {max_iterations}, OR last search found 0 new results
+    - STOP if: {total} >= 5 good matches, OR iteration >= {max_iteration}, OR last search found 0 new results
 
     Broadening strategy:
     - Iteration 2: relax location (city → country → region e.g. Gulf, Middle East)
