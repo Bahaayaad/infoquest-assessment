@@ -59,9 +59,11 @@ curl -X POST http://localhost:8000/chat \
 ## Project Structure
 
 ```
-main.py          # FastAPI app — all routes
-models.py        # Pydantic request/response models
-database.py      # PostgreSQL queries
+chat.py          # chat route
+health.py        # health route
+ingets.py        # ingest route 
+models           # Pydantic request/response models (candidates, chat, health, ingest)
+database         # PostgreSQL and vectorstore
 embeddings.py    # Text → vectors (LangChain)
 vectorstore.py   # ChromaDB (store + search vectors)
 llm.py           # OpenRouter LLM calls
